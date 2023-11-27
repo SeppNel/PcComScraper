@@ -20,7 +20,6 @@ def readTelegramKey():
 
 def sendTelegram(name, price):
     token = readTelegramKey()
-    print(token)
     url = f"https://api.telegram.org/bot{token}"
     params = {"chat_id": "6425902651", "text": f"Lowest Price for {name} of: {price}"}
     r = requests.get(url + "/sendMessage", params=params)
