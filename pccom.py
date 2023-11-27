@@ -11,7 +11,10 @@ def readTelegramKey():
         f = open("telegramKey.txt", "r")
         return f.read()
     except:
-        print("Exception reading telegramKey.txt")
+        print("Exception reading telegramKey.txt, creating blank file...")
+        f = open("telegramKey.txt", "w")
+        f.write("PASTE YOUR API KEY HERE")
+        f.close()
         exit()
 
 
