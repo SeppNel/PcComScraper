@@ -44,6 +44,8 @@ except:
     lowestEver = 1000000
 
 while True:
+    curr_time = time.strftime("%H:%M:%S", time.localtime())
+    print(curr_time)
     print("Scraping...")
     # Configure the WebDriver for Firefox
     service = Service(executable_path='geckodriver.exe', log_path="./geckodriver.log")
