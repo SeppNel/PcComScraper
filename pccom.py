@@ -46,7 +46,7 @@ except:
 while True:
     print("Scraping...")
     # Configure the WebDriver for Firefox
-    service = Service(executable_path='geckodriver.exe')
+    service = Service(executable_path='geckodriver.exe', log_path="./geckodriver.log")
     firefox_options = Options()
     firefox_options.add_argument("--headless")
     firefox_options.headless = True  # Run Firefox in headless mode (no GUI)
