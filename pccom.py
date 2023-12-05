@@ -18,12 +18,11 @@ def readTelegramKey():
         exit()
 
 
-def sendTelegram(name, price):
+def sendTelegram(text):
     token = readTelegramKey()
     url = f"https://api.telegram.org/bot{token}"
-    params = {"chat_id": "6425902651", "text": f"Lowest Price for {name} of: {price}"}
+    params = {"chat_id": "6425902651", "text": text}
     r = requests.get(url + "/sendMessage", params=params)
-
 
 def writePriceTxt(price):
     f = open("priceHistory.txt", "w")
@@ -44,69 +43,75 @@ except:
     lowestEver = 1000000
 
 while True:
-    curr_time = time.strftime("%H:%M:%S", time.localtime())
-    print(curr_time)
-    print("Scraping...")
-    # Configure the WebDriver for Firefox
-    service = Service(executable_path='geckodriver.exe', log_path="./geckodriver.log")
-    firefox_options = Options()
-    firefox_options.add_argument("--headless")
-    firefox_options.headless = True  # Run Firefox in headless mode (no GUI)
-    driver = webdriver.Firefox(options=firefox_options, service=service)
-    driver.implicitly_wait(30)
+    try:
+        curr_time = time.strftime("%H:%M:%S", time.localtime())
+        print(curr_time)
+        print("Scraping...")
+        # Configure the WebDriver for Firefox
+        service = Service(executable_path='geckodriver.exe', log_path="./geckodriver.log")
+        firefox_options = Options()
+        firefox_options.add_argument("--headless")
+        firefox_options.headless = True  # Run Firefox in headless mode (no GUI)
+        driver = webdriver.Firefox(options=firefox_options, service=service)
+        driver.implicitly_wait(30)
 
-    # Load the webpage
-    driver.get(url)
+        # Load the webpage
+        driver.get(url)
 
-    # Get the page source after the content has loaded
-    page_source = driver.page_source
+        # Get the page source after the content has loaded
+        page_source = driver.page_source
 
-    # Parse the HTML content
-    soup = BeautifulSoup(page_source, 'html.parser')
+        # Parse the HTML content
+        soup = BeautifulSoup(page_source, 'html.parser')
 
-    # Find all elements with the specified class for product names
-    product_names = soup.find_all('h3', class_='product-card__title')
-    print(f"Productos: {len(product_names)}")
+        # Find all elements with the specified class for product names
+        product_names = soup.find_all('h3', class_='product-card__title')
+        print(f"Productos: {len(product_names)}")
 
-    print("")
+        print("")
 
-    # Find all elements with the specified class for product prices
-    product_prices = soup.find_all('div', class_='product-card__price-container')
+        # Find all elements with the specified class for product prices
+        product_prices = soup.find_all('div', class_='product-card__price-container')
 
-    i = 0
-    for nan in product_names:
-        product_names[i] = product_names[i].text.strip()
-        price = product_prices[i].text.strip()
-        price = price.split('€', 1)[0]
-        price = float(price.replace(',', '.'))
-        product_prices[i] = price
-        i += 1
+        i = 0
+        for nan in product_names:
+            product_names[i] = product_names[i].text.strip()
+            price = product_prices[i].text.strip()
+            price = price.split('€', 1)[0]
+            price = float(price.replace(',', '.'))
+            product_prices[i] = price
+            i += 1
 
-    ordered = [-1, -1, -1, -1, -1]
-    for i in range(5):
-        lowest = 1000000
-        j = 0
-        for price in product_prices:
-            if price < lowest and j not in ordered and "SATA" not in product_names[j]:
-                ordered[i] = j
-                lowest = price
-            j += 1
+        ordered = [-1, -1, -1, -1, -1]
+        for i in range(5):
+            lowest = 1000000
+            j = 0
+            for price in product_prices:
+                if price < lowest and j not in ordered and "SATA" not in product_names[j]:
+                    ordered[i] = j
+                    lowest = price
+                j += 1
 
-    i = 1
-    for p in ordered:
-        name = product_names[p]
-        price = product_prices[p]
-        print(f"{i}. {name} - Price: {price}")
-        i += 1
+        i = 1
+        for p in ordered:
+            name = product_names[p]
+            price = product_prices[p]
+            print(f"{i}. {name} - Price: {price}")
+            i += 1
 
-    index = ordered[0]
+        index = ordered[0]
 
-    if product_prices[index] < lowestEver:
-        lowestEver = product_prices[index]
-        writePriceTxt(lowestEver)
-        sendTelegram(product_names[index], product_prices[index])
+        if product_prices[index] < lowestEver:
+            lowestEver = product_prices[index]
+            writePriceTxt(lowestEver)
 
-    # Close the WebDriver
-    driver.quit()
-    print("--------------------------------------------------------------")
-    time.sleep(1800) #30 min
+            sendTelegram(f"Lowest Price for {product_names[index]} of: {product_prices[index]}")
+
+        # Close the WebDriver
+        driver.quit()
+        print("--------------------------------------------------------------")
+        time.sleep(1800) #30 min
+    except:
+        sendTelegram("I crashed :(");
+
+    
